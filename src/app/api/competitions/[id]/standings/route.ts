@@ -43,6 +43,7 @@ export async function GET(request:NextRequest,{params}:{params:{id:string,season
     }
     
     const data = await res.json()
+    console.log(data)
     // const table = data.standings?.[0]?.table
 
     // if(!table){

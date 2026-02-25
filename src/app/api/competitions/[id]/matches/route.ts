@@ -29,8 +29,9 @@ export async function GET(request:NextRequest,{params}:{params:{id:string,matchd
         'X-Auth-Token': token
       },
       next:{
-        revalidate:60
-      }
+        revalidate:0
+      },
+      cache:'no-store'
     })
     if(!res.ok){
       console.error("Football API error:",res.status, res.statusText);
