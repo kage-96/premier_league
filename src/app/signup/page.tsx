@@ -1,9 +1,10 @@
+'use client'
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form";
-import { RegisterInput, registerSchema } from "../lib/validation/auth";
+import { RegisterInput, registerSchema } from "../_lib/validation/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-export async function Signup(){
+export default function Signup(){
 
   const router = useRouter();
 
@@ -13,7 +14,7 @@ export async function Signup(){
   })
 
   const onSubmit = async (data:RegisterInput) => {
-    const res = await fetch('api/signup',{
+    const res = await fetch('/api/signup',{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify(data)

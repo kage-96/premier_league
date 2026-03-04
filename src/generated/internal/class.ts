@@ -23,7 +23,7 @@ const config: runtime.GetPrismaClientConfig = {
       "value": "prisma-client"
     },
     "output": {
-      "value": "/Users/kage/react/premier_league/app/generated/prisma",
+      "value": "/Users/kage/react/premier_league/src/generated",
       "fromEnvVar": null
     },
     "config": {
@@ -40,14 +40,13 @@ const config: runtime.GetPrismaClientConfig = {
     "sourceFilePath": "/Users/kage/react/premier_league/prisma/schema.prisma",
     "isCustomOutput": true
   },
-  "relativePath": "../../../prisma",
+  "relativePath": "../../prisma",
   "clientVersion": "6.19.2",
   "engineVersion": "c2990dca591cba766e3b7ef5d9e8a84796e47ab7",
   "datasourceNames": [
     "db"
   ],
   "activeProvider": "sqlite",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
@@ -56,8 +55,8 @@ const config: runtime.GetPrismaClientConfig = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider = \"prisma-client\"\n  output   = \"../app/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"sqlite\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id        String   @id @default(cuid())\n  email     String   @unique\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  googleCredential GoogleCredential?\n  calendarLinks    CalendarEventLink[]\n}\n\nmodel GoogleCredential {\n  id           String   @id @default(cuid())\n  userId       String   @unique\n  user         User     @relation(fields: [userId], references: [id])\n  accessToken  String\n  refreshToken String\n  expiryDate   DateTime\n  scope        String?\n  tokenType    String\n  createdAt    DateTime @default(now()) @map(\"created_at\")\n  updatedAt    DateTime @updatedAt @map(\"updated_at\")\n}\n\nenum CalendarLinkStatus {\n  CREATED\n  DELETED\n  FAILED\n}\n\nmodel CalendarEventLink {\n  id            String             @id @default(cuid())\n  userId        String\n  user          User               @relation(fields: [userId], references: [id])\n  matchId       Int\n  googleEventId String?\n  status        CalendarLinkStatus @default(CREATED)\n  errorCode     String?\n  errorMessage  String?\n  createdAt     DateTime           @default(now()) @map(\"created_at\")\n  updatedAt     DateTime           @updatedAt @map(\"updated_at\")\n\n  @@unique([userId, matchId])\n  @@index([userId])\n  @@index([matchId])\n}\n",
-  "inlineSchemaHash": "ab5e1acea702b1445e05bf91ef288b9955fcaa38d5a6ecd271136229f26607dc",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider = \"prisma-client\"\n  output   = \"../src/generated\"\n}\n\ndatasource db {\n  provider = \"sqlite\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id        String   @id @default(cuid())\n  email     String   @unique\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  googleCredential GoogleCredential?\n  calendarLinks    CalendarEventLink[]\n}\n\nmodel GoogleCredential {\n  id           String   @id @default(cuid())\n  userId       String   @unique\n  user         User     @relation(fields: [userId], references: [id])\n  accessToken  String\n  refreshToken String\n  expiryDate   DateTime\n  scope        String?\n  tokenType    String\n  createdAt    DateTime @default(now()) @map(\"created_at\")\n  updatedAt    DateTime @updatedAt @map(\"updated_at\")\n}\n\nenum CalendarLinkStatus {\n  CREATED\n  DELETED\n  FAILED\n}\n\nmodel CalendarEventLink {\n  id            String             @id @default(cuid())\n  userId        String\n  user          User               @relation(fields: [userId], references: [id])\n  matchId       Int\n  googleEventId String?\n  status        CalendarLinkStatus @default(CREATED)\n  errorCode     String?\n  errorMessage  String?\n  createdAt     DateTime           @default(now()) @map(\"created_at\")\n  updatedAt     DateTime           @updatedAt @map(\"updated_at\")\n\n  @@unique([userId, matchId])\n  @@index([userId])\n  @@index([matchId])\n}\n",
+  "inlineSchemaHash": "60fdcf1455a8459c09fee0eee27b328c95cbdb71ab000c3a30e1066f7ca837e5",
   "copyEngine": true,
   "runtimeDataModel": {
     "models": {},

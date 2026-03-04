@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { LoginInput, loginSchema } from "../lib/validation/auth";
+import { LoginInput, loginSchema } from "../_lib/validation/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 export default function Login(){

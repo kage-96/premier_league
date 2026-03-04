@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request:NextRequest,{params}:{params:{id:string,matchday?:string}}){
+export async function GET(request:NextRequest,contenxt:{params:Promise<{id:string,matchday?:string}>}){
   const token = process.env.FOOTBALL_TOKEN;
   const baseUrl = process.env.FOOTBALL_API_URL;
 
@@ -20,7 +20,7 @@ export async function GET(request:NextRequest,{params}:{params:{id:string,matchd
     )
   }
 
-  const {id} = params;
+  const {id} = await contenxt.params;
   const matchday = request.nextUrl.searchParams.get('matchday') ?? ''
   try{
     console.log(`matchday: ${matchday}`)

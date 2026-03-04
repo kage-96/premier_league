@@ -1,4 +1,4 @@
-import { loginSchema } from "@/app/lib/validation/auth";
+import { loginSchema } from "@/app/_lib/validation/auth";
 import { NextResponse } from "next/server";
 
 export async function POST(req:Request){
