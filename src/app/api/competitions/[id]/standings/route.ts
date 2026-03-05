@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request:NextRequest,{params}:{params:{id:string,season?:string}}){
+export async function GET(request:NextRequest,context:{params: Promise<{id:string}>}){
   const token = process.env.FOOTBALL_TOKEN;
   const baseUrl = process.env.FOOTBALL_API_URL
 
@@ -20,7 +20,7 @@ export async function GET(request:NextRequest,{params}:{params:{id:string,season
     )
   }
 
-  const {id} = params;
+  const {id} = await context.params;
   const season = request.nextUrl.searchParams.get('season') ?? new Date().getFullYear().toString();
 
   try{
@@ -43,6 +43,7 @@ export async function GET(request:NextRequest,{params}:{params:{id:string,season
     }
     
     const data = await res.json()
+    console.log(data)
     // const table = data.standings?.[0]?.table
 
     // if(!table){

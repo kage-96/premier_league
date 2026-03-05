@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output = "../src/generated"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(cuid())
+  email String @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  googleCredential GoogleCredential?
+  calendarLinks CalendarEventLink[]
+}
+
+model GoogleCredential {
+  id String @id @default(cuid())
+  userId String @unique
+  user User @relation(fields:[userId],references:[id])
+  accessToken String
+  refreshToken String
+  expiryDate DateTime
+  scope String?
+  tokenType String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+enum CalendarLinkStatus {
+  CREATED
+  DELETED
+  FAILED
+}
+
+model CalendarEventLink {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields:[userId], references:[id])
+  matchId Int
+  googleEventId String?
+  status CalendarLinkStatus @default(CREATED)
+  errorCode String?
+  errorMessage String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  @@unique([userId,matchId])
+  @@index([userId])
+  @@index([matchId])
+}

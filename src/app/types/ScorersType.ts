@@ -1,3 +1,4 @@
+//得点ランキングの型
 export interface ScorersType {
   player: {
     id: number,
