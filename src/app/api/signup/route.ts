@@ -32,7 +32,7 @@ export async function POST(req:Request){
 
   const {email,password} = parsed.data;
 
-  const existing = await prisma.user.findUniuque({where:{email}})
+  const existing = await prisma.user.findUnique({where:{email}})
   if(existing){
     return NextResponse.json(
       {errorCode:"EMAIL_ALREADY_USED",message:"このメールアドレスは既に使われています。"},
