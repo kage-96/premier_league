@@ -15,51 +15,78 @@ function toDateKey(utc:string){
   return `${y}-${m}-${day}`
 }
 
-function tolabel(dateKey:string){
-  const [,m,d] = dateKey.split('-')
-  return `${Number(m)}月${Number(d)}日`
+function formatJpTime(utc: string) {
+  return new Intl.DateTimeFormat("ja-JP", {
+    timeZone: "Asia/Tokyo",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(utc))
 }
 
 export default function Matches(){
-  const {id} = useParams()
+  const params = useParams<{id:string}>()
+  const id = params.id
   const {data,isLoading,error} = useFetcher<TeamMatchType>(id ? `/api/competitions/${id}/matches` : null)
 
-  const groupd = useMemo(()=> {
-    const matches = (data?.matches ?? []).filter(m => m.status == 'FINISHED')
-    return matches.reduce((acc,match) => {
+  const grouped = useMemo(()=> {
+    const matches = (data?.matches ?? []).filter((m:TeamMatchType['matches'][0]) => m.status == 'FINISHED' || m.status == 'SCHEDULED' || m.status == 'TIMED')
+    const grouped = matches.reduce((acc: Record<string, TeamMatchType['matches']>, match: TeamMatchType['matches'][0]) => {
       const key = toDateKey(match.utcDate)
       ;(acc[key] ??= []).push(match)
       return acc
     },{} as Record<string,TeamMatchType['matches']>)
+    Object.values(grouped).forEach((list) => {
+      list.sort((a:TeamMatchType['matches'][0],b:TeamMatchType['matches'][0]) => 
+      new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime())
+    })
+    return grouped
   },[data])
+  
+  const dateKeys = Object.keys(grouped).sort()
+
+  if(isLoading){return <div>Loading...</div>}
+  if(error){return <div>Error: {error.message}</div>}
+  if(!data){return <div>No data found</div>}
+  console.log(data)
 
   return(
   <div>
     <ul>
-      {data?.matches.map((match:TeamMatchType['matches'][0]) => (
-        <li key={match.id} className="mb-5">
-          {match.status == 'FINISHED' ? (
-            <div className="mb-2">
-              <Link href={`/matches/${match.id}`} className="grid items-center grid-cols-[1fr_60px_1fr]">
-              <div className="flex items-center gap-2 text-right justify-end text-sm">
-                <p>{match.homeTeam.shortName}</p>
-                <Image src={match.homeTeam.crest} alt={match.homeTeam.tla} width={32} height={32} />
-              </div>
-              <div className="flex items-center gap-2 justify-center">
-                <p>{match.score.fullTime.home}</p>
-                <p>-</p>
-                <p>{match.score.fullTime.away}</p>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-left justify-start">
-                <Image src={match.awayTeam.crest} alt={match.awayTeam.tla} width={32} height={32} />
-                <p>{match.awayTeam.shortName}</p>
-              </div>
-              </Link>
-            </div>
-          ):(
-            <>
-            </>
-          )}
+      {dateKeys?.map((dateKey) => (
+        <li key={dateKey} className="mb-5">
+            <h2 className="text-lg text-center font-bold mb-2 bg-gray-800 p-2 rounded-md">{dateKey}</h2>
+          <ul>
+            {grouped[dateKey].map((group:TeamMatchType['matches'][0]) => (
+              <li key={group.id}>
+                <div className="mb-2">
+                  <Link href={`/matches/${group.id}`} className="grid items-center grid-cols-[1fr_60px_1fr]">
+                  <div className="flex items-center gap-2 text-right justify-end text-sm">
+                    <p>{group.homeTeam.shortName}</p>
+                    <Image src={group.homeTeam.crest} alt={group.homeTeam.tla} width={32} height={32} />
+                  </div>
+                  {grouped[dateKey][0].status == 'FINISHED' ? (
+                    <div className="flex items-center gap-2 justify-center">
+                      <p>{group.score.fullTime.home}</p>
+                      <p>-</p>
+                      <p>{group.score.fullTime.away}</p>
+                    </div>
+                  ):(
+                    <div className="flex items-center gap-2 justify-center">
+                      <p>{formatJpTime(group.utcDate)}</p>
+                    </div>
+                  )
+                  }
+
+                  <div className="flex items-center gap-2 text-sm text-left justify-start">
+                    <Image src={group.awayTeam.crest} alt={group.awayTeam.tla} width={32} height={32} />
+                    <p>{group.awayTeam.shortName}</p>
+                  </div>
+                  </Link>
+                </div>
+              </li>
+            ))}
+          </ul>
+
         </li>
       ))}
     </ul>
