@@ -1,7 +1,7 @@
 import { ScorersType } from "@/app/types/ScorersType";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request:NextRequest,{params}:{params:{id:string,limit?:number}}){
+export async function GET(request:NextRequest,context:{params:Promise<{id:string,limit?:number}>}){
   const token = process.env.FOOTBALL_TOKEN;
   const baseUrl = process.env.FOOTBALL_API_URL
 
@@ -21,7 +21,7 @@ export async function GET(request:NextRequest,{params}:{params:{id:string,limit?
     )
   }
 
-  const {id} = params;
+  const {id} = await context.params;
   const limit = request.nextUrl.searchParams.get('limit') ?? 10;
   
   try{
