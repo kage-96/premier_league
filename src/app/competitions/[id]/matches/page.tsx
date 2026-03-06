@@ -51,11 +51,11 @@ export default function Matches(){
 
   return(
   <div>
-    <ul>
+    <ul className="bg-gray-900 rounded-lg p-4">
       {dateKeys?.map((dateKey) => (
         <li key={dateKey} className="mb-5">
             <h2 className="text-lg text-center font-bold mb-2 bg-gray-800 p-2 rounded-md">{dateKey}</h2>
-          <ul>
+          <ul className="bg-gray-900 rounded-lg p-4">
             {grouped[dateKey].map((group:TeamMatchType['matches'][0]) => (
               <li key={group.id}>
                 <div className="mb-2">
