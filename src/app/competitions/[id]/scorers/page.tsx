@@ -14,6 +14,7 @@ export default function Scorers(){
   if(!data){return <div>No data found</div>}
   
   console.log(data);
+  console.log(params)
   return(
     <div className="bg-gray-900 rounded-lg">
       <ul className="px-4 py-8">
