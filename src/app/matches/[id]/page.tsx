@@ -1,8 +1,10 @@
 'use client'
 import { useFetcher } from "@/app/_hooks/useFetcher";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Matchtype } from "@/app/types/MatchType";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { createClient } from "@/app/utils/supabase/client";
 
 function formatJpTime(utc: string) {
   return new Intl.DateTimeFormat("ja-JP", {
@@ -11,6 +13,7 @@ function formatJpTime(utc: string) {
     minute: "2-digit",
   }).format(new Date(utc))
 }
+
 function toDateKey(utc:string){
   const d = new Date(utc)
   const jp = new Date(d.toLocaleString("en-US",{timeZone:"Asia/Tokyo"}))
@@ -21,13 +24,65 @@ function toDateKey(utc:string){
 }
 export default function Matches(){
   const {id} = useParams()
+  const router = useRouter();
 
   const {data,isLoading,error} = useFetcher<Matchtype>(`/api/matches/${id}`)
+  const [isSubmitting,setIsSubmitting] = useState(false);
+
+  const [user,setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const supabase = createClient()
+
+    supabase.auth.getUser().then(({data}) => {
+      setUser(data.user)
+      console.log(user)
+    })
+  },[user])
 
   if(isLoading){return <div>Loading...</div>}
   if(error){return <div>Error: {error.message}</div>}
   if(!data){return <div>No data found</div>}
-  console.log(data)
+
+  const handleAddCalendar = async () => {
+    setIsSubmitting(true);
+    try{
+    const res = await fetch(`/api/google/events`,{
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        matchId: data.id,
+        summary: `${data.homeTeam.shortName} vs ${data.awayTeam.shortName}`,
+        startTime: data.utcDate
+      })
+    })
+    const json = await res.json();
+    console.log(json)
+    if(!res.ok){
+      if(res.status === 401){
+        router.push("/login");
+        return
+      }
+      if(json.error === "GOOGLE_NOT_CONNECTED"){
+        console.log("Google連携ができていない")
+        window.location.href= `/api/google/auth?userId=${user.id}`
+        return
+      }
+      alert("カレンダーに登録できませんでした");
+      return
+    }
+    router.refresh();
+  }catch(error){
+    console.error(error);
+    return
+  }finally{
+    setIsSubmitting(false);
+  }
+
+  }
+
   return (
     <div className="bg-gray-900 rounded-lg p-4">
       <h2 className="text-center text-lg font-bold mb-4 bg-gray-800 p-2 rounded-md">{toDateKey(data.utcDate)}</h2>
@@ -55,7 +110,13 @@ export default function Matches(){
         </div>
       </div>
       {data.status == 'SCHEDULED' || data.status == 'TIMED' && (
-        <button className="bg-blue-500 text-sm text-white px-4 py-2 rounded-md mx-auto block mt-4">カレンダーに登録</button>
+
+         <button
+          onClick={handleAddCalendar}
+          disabled={isSubmitting}
+          className="bg-blue-500 text-sm text-white px-4 py-2 rounded-md mx-auto block mt-4">
+            カレンダーに登録
+          </button>
       )}
     </div>
   )

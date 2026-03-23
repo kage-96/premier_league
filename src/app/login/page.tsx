@@ -4,10 +4,11 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { LoginInput, loginSchema } from "../_lib/validation/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { supabase } from "../_lib/supabase";
+import { createClient } from "../utils/supabase/client";
 
 export default function Login(){
   const router = useRouter()
+  const supabase = createClient()
 
   const {
     register,
@@ -32,7 +33,15 @@ export default function Login(){
       })
       return
     }
-    router.replace("/");
+
+    await supabase.auth.getSession();
+    const res = await fetch("/api/user/sync", {
+      method: "POST"
+    })
+    console.log(res)
+
+    router.refresh()
+    window.location.href = "/"
   }
 
   return(
