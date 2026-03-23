@@ -35,7 +35,7 @@ export default function Matches(){
       ;(acc[key] ??= []).push(match)
       return acc
     },{} as Record<string,TeamMatchType['matches']>)
-    Object.values(grouped).forEach((list) => {
+    ;(Object.values(grouped) as TeamMatchType['matches'][]).forEach((list) => {
       list.sort((a:TeamMatchType['matches'][0],b:TeamMatchType['matches'][0]) => 
       new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime())
     })
