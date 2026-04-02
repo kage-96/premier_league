@@ -1,46 +1,46 @@
 'use client'
 import { useFetcher } from "@/app/_hooks/useFetcher"
+import { formatJpTime, toDateKey } from "@/app/_lib/date"
 import { TeamMatchType } from "@/app/types/TeamMatchType"
 import Image from "next/image"
 import Link from "next/link"
-import { useParams } from "next/navigation"
+import { useParams, useSearchParams } from "next/navigation"
 import { useMemo } from "react"
-
-function toDateKey(utc:string){
-  const d = new Date(utc)
-  const jp = new Date(d.toLocaleString("en-US",{timeZone:"Asia/Tokyo"}))
-  const y = jp.getFullYear()
-  const m = String(jp.getMonth() + 1).padStart(2,"0")
-  const day = String(jp.getDate()).padStart(2,"0")
-  return `${y}-${m}-${day}`
-}
-
-function formatJpTime(utc: string) {
-  return new Intl.DateTimeFormat("ja-JP", {
-    timeZone: "Asia/Tokyo",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(utc))
-}
 
 export default function Matches(){
   const params = useParams<{id:string}>()
+  const searchParams = useSearchParams();
+  const round = searchParams.get("round")
+  
   const id = params.id
   const {data,isLoading,error} = useFetcher<TeamMatchType>(id ? `/api/competitions/${id}/matches` : null)
 
   const grouped = useMemo(()=> {
-    const matches = (data?.matches ?? []).filter((m:TeamMatchType['matches'][0]) => m.status == 'FINISHED' || m.status == 'SCHEDULED' || m.status == 'TIMED')
+    if(!data?.matches?.length) return {}
+
+
+    const roundNumber = Number(round)
+    let matches: TeamMatchType['matches'] = []
+    if(round && !isNaN(roundNumber)){
+      matches = data?.matches.filter((m:TeamMatchType['matches'][0]) => m.matchday === roundNumber) ?? []
+    }else{
+      const currentMatchday = data?.matches?.[0]?.season.currentMatchday
+      matches = data?.matches.filter((m:TeamMatchType['matches'][0]) => currentMatchday === m.matchday) ?? []
+    }
+
+
     const grouped = matches.reduce((acc: Record<string, TeamMatchType['matches']>, match: TeamMatchType['matches'][0]) => {
-      const key = toDateKey(match.utcDate)
-      ;(acc[key] ??= []).push(match)
+      const key = toDateKey(match.utcDate);
+      (acc[key] ??= []).push(match)
       return acc
-    },{} as Record<string,TeamMatchType['matches']>)
-    ;(Object.values(grouped) as TeamMatchType['matches'][]).forEach((list) => {
+    },{} as Record<string,TeamMatchType['matches']>);
+
+    (Object.values(grouped) as TeamMatchType['matches'][]).forEach((list) => {
       list.sort((a:TeamMatchType['matches'][0],b:TeamMatchType['matches'][0]) => 
       new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime())
     })
     return grouped
-  },[data])
+  },[data,round])
   
   const dateKeys = Object.keys(grouped).sort()
 

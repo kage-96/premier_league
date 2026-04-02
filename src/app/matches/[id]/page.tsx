@@ -5,6 +5,7 @@ import { Matchtype } from "@/app/types/MatchType";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { createClient } from "@/app/utils/supabase/client";
+import { toDateKey } from "@/app/_lib/date";
 
 function formatJpTime(utc: string) {
   return new Intl.DateTimeFormat("ja-JP", {
@@ -14,14 +15,6 @@ function formatJpTime(utc: string) {
   }).format(new Date(utc))
 }
 
-function toDateKey(utc:string){
-  const d = new Date(utc)
-  const jp = new Date(d.toLocaleString("en-US",{timeZone:"Asia/Tokyo"}))
-  const y = jp.getFullYear()
-  const m = String(jp.getMonth() + 1).padStart(2,"0")
-  const day = String(jp.getDate()).padStart(2,"0")
-  return `${y}-${m}-${day}`
-}
 export default function Matches(){
   const {id} = useParams()
   const router = useRouter();
@@ -36,7 +29,6 @@ export default function Matches(){
 
   useEffect(() => {
     const supabase = createClient()
-
     supabase.auth.getUser().then(({data}) => {
       setUser(data.user)
     })
@@ -49,7 +41,7 @@ export default function Matches(){
   const handleAddCalendar = async () => {
     setIsSubmitting(true);
     try{
-    const res = await fetch(`/api/google/events`,{
+      const res = await fetch(`/api/google/events`,{
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -61,8 +53,8 @@ export default function Matches(){
       })
     })
     const json = await res.json();
-    console.log(json)
     if(!res.ok){
+      console.log(json.error)
       if(res.status === 401){
         router.push("/login");
         return
